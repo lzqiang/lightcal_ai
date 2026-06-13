@@ -103,7 +103,7 @@ void main() {
   });
 
   testWidgets(
-    'profile setup generates calorie range and opens home placeholder',
+    'profile setup generates calorie range and opens home dashboard',
     (WidgetTester tester) async {
       await _completeLogin(tester);
 
@@ -131,8 +131,65 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('首页'), findsOneWidget);
+      expect(find.textContaining('早上好'), findsOneWidget);
+      expect(find.text('今日进度'), findsOneWidget);
+      expect(find.text('昨日回顾'), findsOneWidget);
+      expect(find.text('今日计划'), findsOneWidget);
+      expect(find.text('拍照记饮食'), findsOneWidget);
+      expect(find.text('手动记饮食'), findsOneWidget);
+      expect(find.text('上传运动截图'), findsOneWidget);
+      expect(find.text('记录'), findsOneWidget);
+      expect(find.text('推荐'), findsOneWidget);
+      expect(find.text('我的'), findsOneWidget);
     },
   );
+
+  testWidgets('home quick actions open their target routes', (
+    WidgetTester tester,
+  ) async {
+    await _completeProfileSetup(tester);
+
+    await tester.ensureVisible(find.text('手动记饮食'));
+    await tester.tap(find.text('手动记饮食'));
+    await tester.pumpAndSettle();
+    expect(find.text('手动饮食记录'), findsWidgets);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('拍照记饮食'));
+    await tester.tap(find.text('拍照记饮食'));
+    await tester.pumpAndSettle();
+    expect(find.text('饮食识别'), findsWidgets);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('上传运动截图'));
+    await tester.tap(find.text('上传运动截图'));
+    await tester.pumpAndSettle();
+    expect(find.text('运动识别'), findsWidgets);
+  });
+
+  testWidgets('bottom navigation switches between main sections', (
+    WidgetTester tester,
+  ) async {
+    await _completeProfileSetup(tester);
+
+    await tester.tap(find.text('推荐'));
+    await tester.pumpAndSettle();
+    expect(find.text('推荐页'), findsOneWidget);
+
+    await tester.tap(find.text('记录'));
+    await tester.pumpAndSettle();
+    expect(find.text('历史记录'), findsOneWidget);
+
+    await tester.tap(find.text('我的'));
+    await tester.pumpAndSettle();
+    expect(find.text('我的页'), findsOneWidget);
+
+    await tester.tap(find.text('首页'));
+    await tester.pumpAndSettle();
+    expect(find.text('今日进度'), findsOneWidget);
+  });
 }
 
 Future<void> _openLoginPage(WidgetTester tester) async {
@@ -155,5 +212,18 @@ Future<void> _completeLogin(WidgetTester tester) async {
   await tester.tap(find.byType(Checkbox));
   await tester.pump();
   await tester.tap(find.widgetWithText(FilledButton, '登录'));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _completeProfileSetup(WidgetTester tester) async {
+  await _completeLogin(tester);
+  await tester.enterText(find.widgetWithText(TextFormField, '昵称'), '赵强');
+  await tester.enterText(find.widgetWithText(TextFormField, '年龄'), '30');
+  await tester.enterText(find.widgetWithText(TextFormField, '身高 cm'), '168');
+  await tester.enterText(find.widgetWithText(TextFormField, '当前体重 kg'), '68');
+  await tester.enterText(find.widgetWithText(TextFormField, '目标体重 kg'), '60');
+  await tester.ensureVisible(find.widgetWithText(FilledButton, '生成计划'));
+  await tester.pump();
+  await tester.tap(find.widgetWithText(FilledButton, '生成计划'));
   await tester.pumpAndSettle();
 }
