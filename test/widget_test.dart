@@ -169,6 +169,52 @@ void main() {
     expect(find.text('运动识别'), findsWidgets);
   });
 
+  testWidgets('manual diet page saves foods and updates home intake', (
+    WidgetTester tester,
+  ) async {
+    await _completeProfileSetup(tester);
+
+    await tester.ensureVisible(find.text('手动记饮食'));
+    await tester.tap(find.text('手动记饮食'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('手动记饮食'), findsOneWidget);
+    expect(find.text('选择餐次'), findsOneWidget);
+    expect(find.text('早餐'), findsOneWidget);
+    expect(find.text('午餐'), findsOneWidget);
+    expect(find.text('晚餐'), findsOneWidget);
+    expect(find.text('加餐'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '食物名称'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '估算热量'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '备注'), findsOneWidget);
+    expect(find.text('AI 估算可能存在偏差，请确认份量后保存。'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, '食物名称'), '鸡胸肉');
+    await tester.enterText(find.widgetWithText(TextFormField, '估算热量'), '230');
+    await tester.pump();
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '添加'));
+    await tester.tap(find.widgetWithText(FilledButton, '添加'));
+    await tester.pump();
+    expect(find.text('鸡胸肉 · 正常'), findsOneWidget);
+    expect(find.text('230 kcal'), findsOneWidget);
+
+    await tester.enterText(find.widgetWithText(TextFormField, '食物名称'), '米饭');
+    await tester.enterText(find.widgetWithText(TextFormField, '估算热量'), '140');
+    await tester.pump();
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '添加'));
+    await tester.tap(find.widgetWithText(FilledButton, '添加'));
+    await tester.pump();
+    expect(find.text('米饭 · 正常'), findsOneWidget);
+    expect(find.text('本餐约 370 kcal'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, '保存到今日记录'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('今日进度'), findsOneWidget);
+    expect(find.text('370'), findsOneWidget);
+    expect(find.text('已记录 1/3 餐'), findsOneWidget);
+  });
+
   testWidgets('bottom navigation switches between main sections', (
     WidgetTester tester,
   ) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/state/app_state.dart';
 import '../../../core/theme/app_theme.dart';
 
 class HomePage extends StatefulWidget {
@@ -65,6 +66,8 @@ class _HomeDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appState = AppStateScope.watch(context);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
       child: Column(
@@ -95,13 +98,13 @@ class _HomeDashboard extends StatelessWidget {
           const SizedBox(height: 16),
           const _ProgressCard(),
           const SizedBox(height: 12),
-          const _TodayProgressCard(),
+          _TodayProgressCard(appState: appState),
           const SizedBox(height: 12),
           const _YesterdayReviewCard(),
           const SizedBox(height: 12),
           const _TodayPlanCard(),
           const SizedBox(height: 12),
-          const _CompletionCard(),
+          _CompletionCard(appState: appState),
           const SizedBox(height: 12),
           const _QuickActions(),
         ],
@@ -158,10 +161,14 @@ class _ProgressCard extends StatelessWidget {
 }
 
 class _TodayProgressCard extends StatelessWidget {
-  const _TodayProgressCard();
+  const _TodayProgressCard({required this.appState});
+
+  final AppState appState;
 
   @override
   Widget build(BuildContext context) {
+    final intake = appState.todayIntakeCalories;
+
     return _CardSection(
       onTap: () {},
       child: Column(
@@ -175,23 +182,30 @@ class _TodayProgressCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              const _Pill(label: '控制良好'),
+              _Pill(label: appState.todayStatus),
             ],
           ),
           const SizedBox(height: 10),
-          const Row(
+          Row(
             children: [
               Expanded(
-                child: _StatTile(label: '已摄入', value: '920', unit: 'kcal'),
+                child: _StatTile(
+                  label: '已摄入',
+                  value: intake.toString(),
+                  unit: 'kcal',
+                ),
               ),
-              SizedBox(width: 10),
-              Expanded(
+              const SizedBox(width: 10),
+              const Expanded(
                 child: _StatTile(label: '已消耗', value: '180', unit: 'kcal'),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          const _InfoRow(label: '还可摄入', value: '约 530 kcal'),
+          _InfoRow(
+            label: '还可摄入',
+            value: '约 ${appState.remainingCalories} kcal',
+          ),
           const SizedBox(height: 6),
           Text('点击查看今天详情', style: Theme.of(context).textTheme.bodyMedium),
         ],
@@ -276,7 +290,9 @@ class _TodayPlanCard extends StatelessWidget {
 }
 
 class _CompletionCard extends StatelessWidget {
-  const _CompletionCard();
+  const _CompletionCard({required this.appState});
+
+  final AppState appState;
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +302,10 @@ class _CompletionCard extends StatelessWidget {
         children: [
           Text('记录完成度', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
-          const _InfoRow(label: '饮食记录', value: '已记录 1/3 餐'),
+          _InfoRow(
+            label: '饮食记录',
+            value: '已记录 ${appState.recordedMealCount}/3 餐',
+          ),
           const SizedBox(height: 6),
           const _InfoRow(label: '运动完成', value: '待完成'),
         ],
