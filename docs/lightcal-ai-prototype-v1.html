@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>轻卡 AI 原型 v1</title>
+  <style>
+    :root {
+      --bg: #f4fbf5;
+      --surface: #ffffff;
+      --ink: #121816;
+      --muted: #637067;
+      --line: #dde9e0;
+      --primary: #1e9e5b;
+      --primary-dark: #0c5435;
+      --primary-soft: #dbf6e6;
+      --blue-soft: #e4f2ff;
+      --red-soft: #ffe9e6;
+      --shadow: 0 12px 28px rgba(17, 31, 24, .10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #eef3ef;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+    }
+    .board {
+      padding: 36px;
+      min-width: 5000px;
+    }
+    .board-title {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.25;
+    }
+    .board-note {
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .screens {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+    .phone-wrap { width: 390px; }
+    .screen-name {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border: 1px solid #d7e3da;
+      border-radius: 28px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(20, 32, 25, .16);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 28px; line-height: 36px; }
+    h2 { font-size: 22px; line-height: 28px; }
+    h3 { font-size: 18px; line-height: 24px; }
+    p { font-size: 14px; line-height: 20px; color: var(--muted); }
+    .sub { font-size: 12px; line-height: 16px; color: var(--muted); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .hero {
+      margin-top: 32px;
+      padding: 42px 24px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      text-align: center;
+      color: var(--primary-dark);
+    }
+    .hero strong {
+      display: block;
+      font-size: 38px;
+      line-height: 44px;
+      margin-bottom: 8px;
+    }
+    .hero-preview {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 258px;
+    }
+    .hero-preview .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .hero-preview .brand h2 {
+      font-size: 28px;
+      line-height: 34px;
+      color: var(--primary-dark);
+    }
+    .preview-card {
+      background: rgba(255, 255, 255, .76);
+      border: 1px solid rgba(30, 158, 91, .16);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: var(--ink);
+    }
+    .preview-card strong {
+      display: block;
+      font-size: 15px;
+      line-height: 20px;
+      color: var(--ink);
+      margin: 0;
+    }
+    .preview-card p {
+      font-size: 12px;
+      line-height: 16px;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+    }
+    .pill.red { background: var(--red-soft); color: #8a2119; }
+    .pill.blue { background: var(--blue-soft); color: #12486d; }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat {
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+    .stat .value {
+      margin-top: 2px;
+      font-size: 24px;
+      line-height: 30px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 20px;
+    }
+    .row b { white-space: nowrap; }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .input {
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 20px;
+    }
+    .login-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+    .btn {
+      min-height: 48px;
+      border-radius: 8px;
+      border: 0;
+      background: var(--primary);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 14px;
+    }
+    .btn.secondary {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+    .photo {
+      min-height: 152px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+    .photo.blue { background: var(--blue-soft); }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .mini {
+      background: var(--bg);
+      border: 0;
+      box-shadow: none;
+      padding: 10px;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+    .day {
+      min-height: 76px;
+      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      padding: 7px 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-align: center;
+    }
+    .day.active {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+    }
+    .day b {
+      font-size: 12px;
+      line-height: 15px;
+    }
+    .day small {
+      font-size: 10px;
+      line-height: 12px;
+      color: var(--muted);
+    }
+    .spacer { flex: 1; }
+    .nav {
+      margin-top: auto;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      box-shadow: 0 10px 24px rgba(17, 31, 24, .08);
+    }
+    .nav span {
+      min-height: 54px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .nav b {
+      width: 26px;
+      height: 22px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: inherit;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .nav .active {
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+    .nav .active b {
+      background: var(--primary);
+      color: #fff;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 8px;
+      background: var(--line);
+      overflow: hidden;
+    }
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 64%;
+      border-radius: 8px;
+      background: var(--primary);
+    }
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <main class="board">
+    <h1 class="board-title">轻卡 AI 减肥 App 原型 v1</h1>
+    <p class="board-note">DeepSeek 接入：食物图片分析、运动截图识别、每日总结、食谱与运动推荐。</p>
+    <section class="screens">
+      <div class="phone-wrap">
+        <p class="screen-name">启动页</p>
+        <div class="phone">
+          <div class="hero-preview">
+            <div class="brand">
+              <div><h2>轻卡 AI</h2><p>拍照记录饮食，AI 规划减脂</p></div>
+              <span class="pill">DeepSeek</span>
+            </div>
+            <div class="preview-card">
+              <strong>今日午餐 · AI 已识别</strong>
+              <p>米饭 · 鸡胸肉 · 青菜</p>
+              <div class="row"><span>估算摄入</span><b>620 kcal</b></div>
+            </div>
+            <div class="preview-grid">
+              <div class="preview-card">
+                <strong>运动截图</strong>
+                <p>快走 30 分钟</p>
+                <b>180 kcal</b>
+              </div>
+              <div class="preview-card">
+                <strong>明日计划</strong>
+                <p>晚餐减主食</p>
+                <b>已更新</b>
+              </div>
+            </div>
+          </div>
+          <h1>轻卡 AI</h1>
+          <p>记录每天吃的和运动消耗，DeepSeek 分析热量和状态，给你明天能执行的食谱与运动建议。</p>
+          <div class="card">
+            <h3>点击“开始记录”后</h3>
+            <div class="row"><span>未登录</span><b>进入快捷登录</b></div>
+            <div class="row"><span>资料未填</span><b>进入基础信息</b></div>
+            <div class="row"><span>老用户</span><b>直接进首页</b></div>
+          </div>
+          <div class="spacer"></div>
+          <div class="btn">开始记录</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">登录页</p>
+        <div class="phone">
+          <div class="login-panel">
+            <div class="card">
+              <h3>手机号快捷登录</h3>
+              <div class="input"><span>请输入手机号</span></div>
+              <div class="input"><span>请输入验证码</span><b>获取验证码</b></div>
+              <p>手机号作为账号标识，登录后可在“我的”页查看和管理。</p>
+              <div class="btn">登录</div>
+            </div>
+            <div class="btn secondary">微信一键登录</div>
+            <p>登录即表示已阅读并同意《用户协议》和《隐私政策》。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">基础信息</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>基础信息</h2><p class="sub">生成你的每日摄入范围</p></div><span class="pill">AI</span></div>
+          <div class="card"><p>昵称</p><h3>赵强</h3></div>
+          <div class="card"><p>当前体重</p><h3>68 kg</h3></div>
+          <div class="card"><p>目标体重</p><h3>60 kg</h3></div>
+          <div class="card"><p>目标截止时间</p><h3>2026年9月12日</h3></div>
+          <div class="card"><p>身高</p><h3>168 cm</h3></div>
+          <div class="card"><p>减脂速度</p><h3>正常减</h3></div>
+          <div class="card"><h3>目标可行性</h3><p>按当前目标，建议每日摄入 1450-1650 kcal，目标节奏合理。</p></div>
+          <div class="spacer"></div>
+          <div class="btn">生成计划</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">首页</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>早上好，赵强</h2><p class="sub">已连续记录 12 天</p></div><span class="pill">目标中</span></div>
+          <div class="card">
+            <div class="row"><h3>目标进度</h3><b>60.0 kg</b></div>
+            <p>当前 66.8 kg，距离目标还差 6.8 kg</p>
+            <div class="progress"><span></span></div>
+          </div>
+          <div class="card">
+            <div class="row"><h3>今日进度</h3><span class="pill">控制良好</span></div>
+            <div class="stats">
+              <div class="stat"><p>已摄入</p><div class="value">920</div><p>kcal</p></div>
+              <div class="stat"><p>已消耗</p><div class="value">180</div><p>kcal</p></div>
+            </div>
+            <div class="row"><span>还可摄入</span><b>约 530 kcal</b></div>
+            <p>点击查看今天详情</p>
+          </div>
+          <div class="card">
+            <div class="row"><h3>昨日回顾</h3><span class="pill">略超标</span></div>
+            <div class="stats">
+              <div class="stat"><p>摄入</p><div class="value">1820</div><p>kcal</p></div>
+              <div class="stat"><p>消耗</p><div class="value">260</div><p>kcal</p></div>
+            </div>
+            <p>AI：今天晚餐控制油脂，运动保持快走即可。点击查看昨天详情。</p>
+          </div>
+          <div class="card">
+            <div class="row"><h3>今日计划</h3><span class="pill blue">待完成</span></div>
+            <div class="card mini"><b>早餐 已完成</b><p>鸡蛋 2 个 · 无糖酸奶</p></div>
+            <div class="card mini"><b>午餐 建议</b><p>鸡胸肉 · 半碗米饭 · 西兰花</p></div>
+            <div class="card mini"><b>晚餐 建议</b><p>豆腐虾仁 · 两份蔬菜 · 主食半碗</p></div>
+            <div class="card mini"><b>训练 待完成</b><p>饭后快走 30 分钟 · 中等强度</p></div>
+          </div>
+          <div class="actions"><div class="btn">拍照记饮食</div><div class="btn secondary">手动记饮食</div><div class="btn secondary">上传运动截图</div></div>
+          <nav class="nav"><span class="active"><b>⌂</b>首页</span><span><b>▤</b>记录</span><span><b>✦</b>推荐</span><span><b>◎</b>我的</span></nav>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">饮食识别</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>饮食识别</h2><p class="sub">AI 估算后请确认份量</p></div><span class="pill">AI</span></div>
+          <div class="photo">午餐照片预览</div>
+          <div class="card">
+            <h3>DeepSeek 识别结果</h3>
+            <div class="row"><span>米饭 · 正常</span><b>280 kcal</b></div>
+            <div class="row"><span>红烧肉 · 偏多</span><b>360 kcal</b></div>
+            <div class="row"><span>青菜 · 正常</span><b>80 kcal</b></div>
+            <span class="pill blue">总计约 720 kcal</span>
+            <p>图片角度可能影响份量，保存前请确认。</p>
+          </div>
+          <div class="card"><h3>确认</h3><div class="chips"><span class="pill">早餐</span><span class="pill">午餐</span><span class="pill">晚餐</span><span class="pill">加餐</span></div></div>
+          <div class="spacer"></div>
+          <div class="btn">保存饮食记录</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">手动饮食记录</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>手动记饮食</h2><p class="sub">不拍照也能快速记录</p></div><span class="pill">手动</span></div>
+          <div class="card">
+            <h3>选择餐次</h3>
+            <div class="chips"><span class="pill">早餐</span><span class="pill">午餐</span><span class="pill">晚餐</span><span class="pill">加餐</span></div>
+          </div>
+          <div class="card">
+            <h3>添加食物</h3>
+            <div class="input"><span>食物名称，例如 鸡胸肉</span></div>
+            <div class="chips"><span class="pill">少量</span><span class="pill">正常</span><span class="pill">偏多</span></div>
+            <div class="input"><span>估算热量</span><b>kcal</b></div>
+            <div class="actions"><div class="btn secondary">AI 估算热量</div><div class="btn">添加</div></div>
+          </div>
+          <div class="card">
+            <h3>已添加</h3>
+            <div class="row"><span>鸡胸肉 · 正常</span><b>230 kcal</b></div>
+            <div class="row"><span>米饭 · 半碗</span><b>140 kcal</b></div>
+            <div class="row"><span>西兰花 · 正常</span><b>60 kcal</b></div>
+            <span class="pill blue">本餐约 430 kcal</span>
+          </div>
+          <div class="card"><h3>备注</h3><p>可选：少油、外卖、食堂、饭后加餐等。</p></div>
+          <div class="spacer"></div>
+          <div class="btn">保存到今日记录</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">运动识别</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>运动识别</h2><p class="sub">上传截图或手动补录</p></div><span class="pill">AI</span></div>
+          <div class="photo blue">运动截图预览</div>
+          <div class="card">
+            <h3>DeepSeek 提取数据</h3>
+            <div class="row"><span>运动类型</span><b>跑步</b></div>
+            <div class="row"><span>时长</span><b>35 分钟</b></div>
+            <div class="row"><span>距离</span><b>4.2 km</b></div>
+            <div class="row"><span>消耗</span><b>280 kcal</b></div>
+            <p>截图已有热量时优先采用截图数据。</p>
+          </div>
+          <div class="card"><h3>识别失败？</h3><p>可手动选择运动类型、时长和强度。</p><div class="btn secondary">手动输入</div></div>
+          <div class="spacer"></div>
+          <div class="btn">保存运动记录</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">推荐</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>AI 推荐</h2><p class="sub">明天这样吃和动</p></div><span class="pill">AI</span></div>
+          <div class="card">
+            <div class="row"><h3>明日计划</h3><span class="pill">未开始</span></div>
+            <div class="row"><span>摄入目标</span><b>1400-1600 kcal</b></div>
+            <div class="row"><span>运动目标</span><b>快走 35 分钟</b></div>
+            <p>根据昨天略超标和今天控制良好，明天保持轻量调整，不做极端补偿。</p>
+            <div class="btn">根据历史更新计划</div>
+          </div>
+          <div class="card">
+            <h3>明日食谱</h3>
+            <div class="card mini"><b>早餐</b><p>鸡蛋 2 个 · 无糖酸奶 · 全麦面包</p></div>
+            <div class="card mini"><b>午餐</b><p>鸡胸肉 · 半碗米饭 · 两份蔬菜</p></div>
+            <div class="card mini"><b>晚餐</b><p>豆腐虾仁 · 大量蔬菜 · 少量主食</p></div>
+          </div>
+          <div class="card"><h3>运动建议</h3><p>饭后快走 30 分钟。若感觉疲劳，改成 15 分钟轻松走。</p><span class="pill">低门槛 · 可执行</span></div>
+          <div class="card">
+            <h3>计划日历</h3>
+            <div class="calendar">
+              <div class="day"><b>今天</b><small>1450-1650</small><small>快走</small></div>
+              <div class="day active"><b>明天</b><small>1400-1600</small><small>快走</small></div>
+              <div class="day"><b>周日</b><small>1500</small><small>力量</small></div>
+              <div class="day"><b>周一</b><small>1450</small><small>休息</small></div>
+              <div class="day"><b>周二</b><small>1500</small><small>跑步</small></div>
+              <div class="day"><b>周三</b><small>1450</small><small>快走</small></div>
+              <div class="day"><b>周四</b><small>1500</small><small>力量</small></div>
+            </div>
+          </div>
+          <nav class="nav"><span><b>⌂</b>首页</span><span><b>▤</b>记录</span><span class="active"><b>✦</b>推荐</span><span><b>◎</b>我的</span></nav>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">历史记录</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>历史记录</h2><p class="sub">按日期查看摄入、消耗和状态</p></div><span class="pill">AI</span></div>
+          <div class="card">
+            <h3>最近记录</h3>
+            <div class="row"><span>今天<br><small>1450 kcal · 420 kcal</small></span><span class="pill">控制良好</span></div>
+            <div class="row"><span>昨天<br><small>1820 kcal · 260 kcal</small></span><span class="pill">略超标</span></div>
+            <div class="row"><span>6月10日<br><small>1600 kcal · 510 kcal</small></span><span class="pill">控制良好</span></div>
+            <div class="row"><span>6月9日<br><small>2100 kcal · 120 kcal</small></span><span class="pill red">超标</span></div>
+            <div class="row"><span>6月8日<br><small>1320 kcal · 300 kcal</small></span><span class="pill blue">摄入偏低</span></div>
+          </div>
+          <div class="card"><h3>点击一天查看详情</h3><p>进入“单日详情页”，展示当天饮食、运动、摄入合计、消耗合计和 AI 总结。</p></div>
+          <nav class="nav"><span><b>⌂</b>首页</span><span class="active"><b>▤</b>记录</span><span><b>✦</b>推荐</span><span><b>◎</b>我的</span></nav>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">单日详情</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>6月11日</h2><p class="sub">从历史记录点击进入</p></div><span class="pill">略超标</span></div>
+          <div class="card">
+            <h3>当天汇总</h3>
+            <div class="stats">
+              <div class="stat"><p>摄入</p><div class="value">1820</div><p>kcal</p></div>
+              <div class="stat"><p>消耗</p><div class="value">260</div><p>kcal</p></div>
+            </div>
+            <div class="row"><span>净摄入</span><b>1560 kcal</b></div>
+          </div>
+          <div class="card">
+            <h3>饮食记录</h3>
+            <div class="row"><span>早餐 燕麦 牛奶 鸡蛋</span><b>420 kcal</b></div>
+            <div class="row"><span>午餐 米饭 牛肉 青菜</span><b>680 kcal</b></div>
+            <div class="row"><span>晚餐 火锅 少量饮料</span><b>720 kcal</b></div>
+          </div>
+          <div class="card">
+            <h3>运动记录</h3>
+            <div class="row"><span>快走 32 分钟</span><b>160 kcal</b></div>
+            <div class="row"><span>力量训练 15 分钟</span><b>100 kcal</b></div>
+          </div>
+          <div class="card">
+            <h3>AI 当日总结</h3>
+            <p>昨天晚餐油脂和钠偏高，运动量有补充但不足以抵消晚餐热量。今天建议早餐增加蛋白质，晚餐减少高油汤底。</p>
+          </div>
+          <div class="card"><h3>只读复盘</h3><p>单日详情只用于查看，不提供编辑入口。需要改记录时，从记录列表进入对应记录。</p></div>
+          <div class="btn">返回历史</div>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <p class="screen-name">我的</p>
+        <div class="phone">
+          <div class="topbar"><div><h2>我的</h2><p class="sub">账号资料和目标设置</p></div><span class="pill">已登录</span></div>
+          <div class="card">
+            <div class="profile">
+              <div class="avatar">赵</div>
+              <div>
+                <h3>赵强</h3>
+                <p>138****5678</p>
+                <span class="pill">连续记录 12 天</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>目标信息</h3>
+            <div class="row"><span>当前体重</span><b>66.8 kg</b></div>
+            <div class="row"><span>目标体重</span><b>60.0 kg</b></div>
+            <div class="row"><span>截止时间</span><b>2026年9月12日</b></div>
+            <div class="row"><span>建议摄入</span><b>1450-1650 kcal</b></div>
+          </div>
+          <div class="card">
+            <h3>资料设置</h3>
+            <div class="row"><span>编辑个人资料</span><b>昵称 / 头像 / 手机号</b></div>
+            <div class="row"><span>身体信息</span><b>身高 / 体重 / 目标</b></div>
+            <div class="row"><span>饮食偏好</span><b>外卖党 · 少辣</b></div>
+            <div class="row"><span>运动基础</span><b>偶尔运动</b></div>
+          </div>
+          <div class="card">
+            <h3>其他</h3>
+            <div class="row"><span>用户协议</span><b>查看</b></div>
+            <div class="row"><span>隐私政策</span><b>查看</b></div>
+            <div class="row"><span>退出登录</span><b>退出</b></div>
+          </div>
+          <nav class="nav"><span><b>⌂</b>首页</span><span><b>▤</b>记录</span><span><b>✦</b>推荐</span><span class="active"><b>◎</b>我的</span></nav>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
