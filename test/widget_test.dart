@@ -21,7 +21,7 @@ void main() {
     expect(find.widgetWithText(FilledButton, '开始记录'), findsOneWidget);
   });
 
-  testWidgets('start button opens the login route placeholder', (
+  testWidgets('start button opens the login page', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const MyApp());
@@ -30,6 +30,53 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, '开始记录'));
     await tester.pumpAndSettle();
 
-    expect(find.text('登录页'), findsOneWidget);
+    expect(find.text('手机号快捷登录'), findsOneWidget);
+  });
+
+  testWidgets('login page shows phone login content from the product spec', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '开始记录'));
+    await tester.tap(find.widgetWithText(FilledButton, '开始记录'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('轻卡 AI'), findsOneWidget);
+    expect(find.text('手机号快捷登录'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '请输入手机号'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '请输入验证码'), findsOneWidget);
+    expect(find.text('获取验证码'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, '登录'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '微信一键登录'), findsOneWidget);
+    expect(find.textContaining('用户协议'), findsOneWidget);
+    expect(find.textContaining('隐私政策'), findsOneWidget);
+  });
+
+  testWidgets('login requires agreement before entering profile setup', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.ensureVisible(find.widgetWithText(FilledButton, '开始记录'));
+    await tester.tap(find.widgetWithText(FilledButton, '开始记录'));
+    await tester.pumpAndSettle();
+
+    final loginButton = find.widgetWithText(FilledButton, '登录');
+    expect(tester.widget<FilledButton>(loginButton).onPressed, isNull);
+
+    await tester.enterText(find.widgetWithText(TextFormField, '请输入手机号'), '13800138000');
+    await tester.enterText(find.widgetWithText(TextFormField, '请输入验证码'), '123456');
+    await tester.pump();
+    expect(tester.widget<FilledButton>(loginButton).onPressed, isNull);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pump();
+    expect(tester.widget<FilledButton>(loginButton).onPressed, isNotNull);
+
+    await tester.tap(loginButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('基础信息'), findsOneWidget);
   });
 }

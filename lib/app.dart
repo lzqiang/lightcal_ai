@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/auth/pages/login_page.dart';
 import 'features/splash/pages/splash_page.dart';
 
 class MyApp extends StatelessWidget {
@@ -14,21 +15,22 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.light(),
       routes: {
         '/': (context) => const SplashPage(),
-        '/login': (context) => const LoginPlaceholderPage(),
+        '/login': (context) => const LoginPage(),
+        '/profile-setup': (context) => const ProfileSetupPlaceholderPage(),
       },
     );
   }
 }
 
-class LoginPlaceholderPage extends StatelessWidget {
-  const LoginPlaceholderPage({super.key});
+class ProfileSetupPlaceholderPage extends StatelessWidget {
+  const ProfileSetupPlaceholderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
       body: SafeArea(
         child: Center(
-          child: Text('登录页'),
+          child: Text('基础信息'),
         ),
       ),
     );
